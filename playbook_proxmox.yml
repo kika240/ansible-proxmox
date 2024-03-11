@@ -1,0 +1,40 @@
+---
+- name: Create LXC Container
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars.yml
+    - vault.yml
+
+  tasks:
+    - name: Create LXC Container
+      community.general.proxmox:
+        vmid: "{{ item.id }}"
+        hostname: "{{ item.hostname }}"
+        node: "{{ item.node }}"
+        password: "{{ item.password }}"
+        memory: "{{ item.memory }}"
+        storage: "{{ item.storage }}"
+        netif: "{{ item.netif }}"
+        api_host: "{{ proxmox_host }}"
+        api_user: "{{ proxmox_user }}"
+        api_token_id: "{{ proxmox_token_id }}"
+        api_token_secret: "{{ proxmox_token_secret }}"
+        ostemplate: "{{ item.ostemplate }}"
+        validate_certs: false
+      loop: "{{ vm }}"
+
+    - name: Pause for 10 seconds to build app cache
+      ansible.builtin.pause:
+        seconds: 10
+
+    - name: Start LXC Container
+      community.general.proxmox:
+        vmid: "{{ item.id }}"
+        state: started
+        api_host: "{{ proxmox_host }}"
+        api_user: "{{ proxmox_user }}"
+        api_token_id: "{{ proxmox_token_id }}"
+        api_token_secret: "{{ proxmox_token_secret }}"
+        validate_certs: false
+      loop: "{{ vm }}"

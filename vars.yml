@@ -1,0 +1,18 @@
+---
+vm:
+  - id: 101
+    hostname: NewDeb
+    password: Pass1234
+    node: pve
+    memory: 1024
+    netif: '{"net0":"name=eth0,ip=dhcp,bridge=vmbr0"}'
+    storage: local-lvm
+    ostemplate: local:vztmpl/debian-12-standard_12.2-1_amd64.tar.zst
+  - id: 102
+    hostname: NewDeb2
+    password: Pass1234
+    node: pve
+    memory: 1024
+    netif: '{"net0":"name=eth0,ip=dhcp,bridge=vmbr0"}'
+    storage: local-lvm
+    ostemplate: local:vztmpl/debian-12-standard_12.2-1_amd64.tar.zst
