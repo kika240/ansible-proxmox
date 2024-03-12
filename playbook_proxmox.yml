@@ -7,9 +7,9 @@
     - vault.yml
   vars:
     vm_planned: "{{ query('netbox.netbox.nb_lookup', 'virtual-machines',
-                      api_endpoint='http://localhost:8888/',
+                      api_endpoint=vars['netbox_api'],
                       api_filter='status=planned',
-                      token='0123456789abcdef0123456789abcdef01234567') }}"
+                      token=vars['netbox_token']) }}"
   tasks:
     - name: Obtain list of devices from NetBox
       debug:
