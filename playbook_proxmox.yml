@@ -33,6 +33,7 @@
         ostemplate: "{{ item.value.custom_fields.OSTemplate }}"
         vmid: "{{ item.value.custom_fields.vmid }}"
         disk: "data-vm:{{ item.value.disk }}"
+        cpus : "{{ item.value.vcpus|int}}"
         timeout: 120
         validate_certs: false
       loop: "{{ vm_planned }}"
