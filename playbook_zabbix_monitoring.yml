@@ -1,0 +1,61 @@
+---
+- name: Configure Monitoring
+  hosts: is_virtual
+  become: true
+  
+  tasks:
+    - name: Check if Zabbix repo is configured
+      apt_repository:
+        repo: "{{ item }}"
+        filename: zabbix
+        state: present
+      loop:
+        - deb https://repo.zabbix.com/zabbix/6.4/ubuntu focal main
+        - deb-src https://repo.zabbix.com/zabbix/6.4/ubuntu focal main
+      register: repo
+    
+    - name: Download Zabbix Repo Deb
+      get_url:
+        url: https://repo.zabbix.com/zabbix/6.4/ubuntu/pool/main/z/zabbix-release/zabbix-release_6.4-1+ubuntu20.04_all.deb
+        dest: /tmp/zabbix-release_6.4-1+ubuntu20.04_all.deb
+      when: repo.changed
+    
+    - name: Dpkg Install Zabbix Repo
+      apt:
+        deb: /tmp/zabbix-release_6.4-1+ubuntu20.04_all.deb
+      when: repo.changed
+    
+    - name: APT install of Zabbix Agent2
+      apt:
+        #update_cache: yes
+        pkg:
+          - zabbix-agent2
+          - zabbix-agent2-plugin-*
+        state: present
+    
+    - name: Configure Zabbix Server
+      lineinfile:
+        path: /etc/zabbix/zabbix_agent2.conf
+        regex: '^Server='
+        line: Server=172.25.219.82
+      register: config_server
+    
+    - name: Configure Zabbix Active Server
+      lineinfile:
+        path: /etc/zabbix/zabbix_agent2.conf
+        regex: '^ServerActive='
+        line: ServerActive=172.25.219.82
+      register: config_activeserver
+
+    - name: Configure MetaData for Autoregistration
+      lineinfile:
+        path: /etc/zabbix/zabbix_agent2.conf
+        regex: '^HostMetadata='
+        line: HostMetadata=linux
+      register: config_metadata
+    
+    - name: Reload Zabbix Agent2 Service
+      systemd_service:
+        name: zabbix-agent2
+        state: restarted
+      when: repo.changed or config_server.changed or config_activeserver.changed or config_metadata.changed
