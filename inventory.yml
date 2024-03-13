@@ -7,3 +7,5 @@ config_context: False
 group_by:
  - status
  - is_virtual
+query_filters:
+  - has_primary_ip: 'true'

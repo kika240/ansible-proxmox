@@ -1,0 +1,27 @@
+---
+- name: Rsyslog Management
+  hosts: all
+
+  tasks:
+    - name: Assert that RSyslog is installed
+      ansible.builtin.package:
+        name: rsyslog
+        state: present
+
+    - name: Assert that RSyslog is running
+      ansible.builtin.service:
+        name: rsyslog
+        state: started
+
+    - name: Assert that Log forwarding is configured
+      ansible.builtin.lineinfile:
+        path: /etc/rsyslog.conf
+        line: "*.* @{{ syslog_server }}:514"
+        state: present
+      register: rsyslog_config
+
+    - name: Restart Rsyslog when reconfigured
+      ansible.builtin.service:
+        name: rsyslog
+        state: restarted
+      when: rsyslog_config.changed == true

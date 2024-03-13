@@ -1,0 +1,51 @@
+---
+- name: Get Proxmox Info and Update Netbox
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars.yml
+    - vault.yml
+  collections:
+    - netbox.netbox
+
+  tasks:
+    - name: Connect to Proxmox API / GET LXC 
+      uri:
+        url: https://{{ proxmox_host }}:8006/api2/json/nodes/pve/lxc/
+        headers:
+          Authorization: PVEAPIToken={{ proxmox_user }}!{{ proxmox_token_id }}={{ proxmox_token_secret }}
+        validate_certs: false
+      register: lxc
+      tags: debug
+
+    - name: Debug LXC
+      debug:
+        msg: "{{ (item.maxmem / 1048576) | round|int}}"
+      loop: "{{ lxc.json.data }}"
+      tags: debug
+
+    - name: Create Virtual-Machine dans Netbox
+      netbox_virtual_machine:
+          netbox_url: "{{ netbox_url }}"
+          netbox_token: "{{ netbox_token }}"
+          data:
+            name: "{{ item.name }}"
+            cluster: pve
+            vcpus: "{{ item.cpus }}"
+            memory: "{{ (item.maxmem / 1048576) | round|int}}"
+            disk: "{{ (item.maxdisk / 1073741824) | round|int }}"
+            custom_fields:
+              vmid: "{{ item.vmid|int }}"
+          state: present
+      loop: "{{ lxc.json.data }}"
+
+    #- name: Connect to Netbox API / GET VM where vmid != null
+
+    - name: Connect to Proxmox API / GET LXC {vmid} /config
+    #- name: Connect to Proxmox API / GET LXC {vmid} /interfaces
+
+    #- name: Connect to Netbox API / Create Inteface & IP Address associate VM 
+    #- name: Connect to Netbox API / Add config info to VM
+
+
+ 
