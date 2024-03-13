@@ -34,6 +34,7 @@
         vmid: "{{ item.value.custom_fields.vmid }}"
         disk: "{{ item.value.custom_fields.storageid }}:{{ item.value.disk }}"
         cpus : "{{ item.value.vcpus|int}}"
+        swap : "{{ item.value.custom_fields.swap|int}}"
         timeout: 120
         validate_certs: false
       loop: "{{ vm_planned }}"
