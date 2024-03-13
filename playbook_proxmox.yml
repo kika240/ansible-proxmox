@@ -24,7 +24,7 @@
         node: "{{ item.value.cluster.name }}"
         password: "{{ defaultpassword }}"
         memory: "{{ item.value.memory | default('1024') }}"
-        storage: data-vm
+        storage:  "{{ item.value.custom_fields.storageid }}"
         netif: '{"net0":"name=eth0,ip=dhcp,bridge=vmbr2,tag=1"}'
         api_host: "{{ proxmox_host }}"
         api_user: "{{ proxmox_user }}"
@@ -32,7 +32,7 @@
         api_token_secret: "{{ proxmox_token_secret }}"
         ostemplate: "{{ item.value.custom_fields.OSTemplate }}"
         vmid: "{{ item.value.custom_fields.vmid }}"
-        disk: "data-vm:{{ item.value.disk }}"
+        disk: "{{ item.value.custom_fields.storageid }}:{{ item.value.disk }}"
         cpus : "{{ item.value.vcpus|int}}"
         timeout: 120
         validate_certs: false
