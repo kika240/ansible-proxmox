@@ -31,6 +31,7 @@
         api_token_id: "{{ proxmox_token_id }}"
         api_token_secret: "{{ proxmox_token_secret }}"
         ostemplate: "{{ item.value.custom_fields.OSTemplate }}"
+        vmid: "{{ item.value.custom_fields.vmid }}"
         timeout: 120
         validate_certs: false
       loop: "{{ vm_planned }}"
