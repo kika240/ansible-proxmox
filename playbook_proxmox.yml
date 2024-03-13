@@ -23,7 +23,7 @@
         hostname: "{{ item.value.name }}"
         node: "{{ item.value.cluster.name }}"
         password: "{{ defaultpassword }}"
-        memory: "{{ item.memory | default('1024') }}"
+        memory: "{{ item.value.memory | default('1024') }}"
         storage: data-vm
         netif: '{"net0":"name=eth0,ip=dhcp,bridge=vmbr2,tag=1"}'
         api_host: "{{ proxmox_host }}"
