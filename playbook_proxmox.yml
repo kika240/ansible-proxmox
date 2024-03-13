@@ -32,6 +32,7 @@
         api_token_secret: "{{ proxmox_token_secret }}"
         ostemplate: "{{ item.value.custom_fields.OSTemplate }}"
         vmid: "{{ item.value.custom_fields.vmid }}"
+        disk: "data-vm:{{ item.value.disk }}"
         timeout: 120
         validate_certs: false
       loop: "{{ vm_planned }}"
