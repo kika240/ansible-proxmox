@@ -11,7 +11,7 @@
   tasks:
     - name: Connect to Proxmox API / GET LXC 
       uri:
-        url: https://{{ proxmox_host }}:8006/api2/json/nodes/pve/lxc/
+        url: https://{{ proxmox_host }}:8006/api2/json/nodes/ECR-EPLISSONNEAU-01/lxc/
         headers:
           Authorization: PVEAPIToken={{ proxmox_user }}!{{ proxmox_token_id }}={{ proxmox_token_secret }}
         validate_certs: false
@@ -32,7 +32,7 @@
           netbox_token: "{{ netbox_token }}"
           data:
             name: "{{ item.name }}"
-            cluster: pve
+            cluster: ECR-EPLISSONNEAU-01
             vcpus: "{{ item.cpus }}"
             memory: "{{ (item.maxmem / 1048576) | round|int}}"
             disk: "{{ (item.maxdisk / 1073741824) | round|int }}"
@@ -45,7 +45,7 @@
 
     - name: Connect to Proxmox API / GET LXC {vmid} /config
       uri:
-        url: https://{{ proxmox_host }}:8006/api2/json/nodes/pve/lxc/{{ item.vmid }}/interfaces
+        url: https://{{ proxmox_host }}:8006/api2/json/nodes/ECR-EPLISSONNEAU-01/lxc/{{ item.vmid }}/interfaces
         headers:
           Authorization: PVEAPIToken={{ proxmox_user }}!{{ proxmox_token_id }}={{ proxmox_token_secret }}
         validate_certs: false
