@@ -16,7 +16,9 @@
           Authorization: PVEAPIToken={{ proxmox_user }}!{{ proxmox_token_id }}={{ proxmox_token_secret }}
         validate_certs: false
       register: lxc
-      tags: debug
+      tags: 
+        - debug
+        - config
 
     - name: Debug LXC
       debug:
@@ -42,9 +44,68 @@
     #- name: Connect to Netbox API / GET VM where vmid != null
 
     - name: Connect to Proxmox API / GET LXC {vmid} /config
-    #- name: Connect to Proxmox API / GET LXC {vmid} /interfaces
+      uri:
+        url: https://{{ proxmox_host }}:8006/api2/json/nodes/pve/lxc/{{ item.vmid }}/interfaces
+        headers:
+          Authorization: PVEAPIToken={{ proxmox_user }}!{{ proxmox_token_id }}={{ proxmox_token_secret }}
+        validate_certs: false
+      loop: "{{ lxc.json.data }}"
+      register: lxc_interfaces
+      tags: config
+      
+    - name: Set Network data to empty list when null
+      set_fact:
+        "{{ item.json }}": [ "data": [] ]
+      when: (item.json.data | type_debug != "list")
+      loop: "{{ lxc_interfaces.results }}"
+      tags: config
+      
+      
+    - name: Debug LXC
+      debug:
+        msg: "{{ item.1 }}"
+      when: (item.0.json.data | type_debug == "list")
+      loop: "{{ lxc_interfaces.results | subelements('json.data', skip_missing=True) }}"
+      tags: config
+    
+    - name: Update Netbox API / With vmid /interfaces
+      netbox_vm_interface:
+          netbox_url: "{{ netbox_url }}"
+          netbox_token: "{{ netbox_token }}"
+          data:
+            virtual_machine: "{{ item.0.item.name }}"
+            name: "{{ item.1.name }}"
+            mac_address: "{{ item.1.hwaddr }}"
+          state: present
+      loop: "{{ lxc_interfaces.results | subelements('json.data', skip_missing=True) }}"
+      when: item.1.name != 'lo'
+      tags: config
+      
+    - name: Connect to Netbox API / IP Address associate VM
+      netbox_ip_address:
+          netbox_url: "{{ netbox_url }}"
+          netbox_token: "{{ netbox_token }}"
+          data:
+            address: "{{ item.1.inet }}"
+            assigned_object :
+                virtual_machine: "{{ item.0.item.name }}"
+                name: "{{ item.1.name }}"
+          state: present
+      loop: "{{ lxc_interfaces.results | subelements('json.data', skip_missing=True) }}"
+      when: item.1.name != 'lo'
+      tags: config
 
-    #- name: Connect to Netbox API / Create Inteface & IP Address associate VM 
+    - name: Set IP address as Primary address for the VM
+      netbox_virtual_machine:
+        netbox_url: "{{ netbox_url }}"
+        netbox_token: "{{ netbox_token }}"
+        data:
+          name: "{{ item.0.item.name }}"
+          primary_ip4: "{{ item.1.inet }}"
+      loop: "{{ lxc_interfaces.results | subelements('json.data', skip_missing=True) }}"
+      when: item.1.name != 'lo'
+      tags: config
+    #
     #- name: Connect to Netbox API / Add config info to VM
 
 
