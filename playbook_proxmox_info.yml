@@ -1,0 +1,25 @@
+---
+- name: Get LXC Container Info
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars.yml
+    - vault.yml
+
+  tasks:
+                
+    - name: Get LXC Container Info
+      community.general.proxmox_vm_info:
+        api_host: "{{ proxmox_host }}"
+        api_user: "{{ proxmox_user }}"
+        api_token_id: "{{ proxmox_token_id }}"
+        api_token_secret: "{{ proxmox_token_secret }}"
+        validate_certs: false
+      register: output
+      tags: debug
+
+    - name: Show Output VM Info from Proxmox
+      debug:
+        msg: "{{ output }}"
+      tags:
+       - debug
